@@ -1,15 +1,25 @@
-const loadPhone = (searchText) => {
+const loadPhone = (searchText, dataLimit) => {
     const url = `https://openapi.programming-hero.com/api/phones?search=${searchText}`
     fetch(url)
         .then(res => res.json())
-        .then(data => displayPhones(data.data))
+        .then(data => displayPhones(data.data, dataLimit))
 }
 
-const displayPhones = (phones) => {
+const displayPhones = (phones, dataLimit) => {
     const phonesContainer = document.getElementById('phone_container');
     phonesContainer.textContent = '';
-    // show only 10 phones 
-    phones = phones.slice(0, 10)
+    // showAllButton-------------
+    const showAll = document.getElementById('show-all')
+    if (dataLimit && phones.length > 10) {
+        phones = phones.slice(0, 10);
+        showAll.classList.remove('d-none')
+    }
+    else {
+        showAll.classList.add('d-none')
+    }
+
+
+
     // no Phone message 
     const noPhone = document.getElementById('no_phone_found')
     if (phones.length === 0) {
@@ -19,7 +29,7 @@ const displayPhones = (phones) => {
     }
 
     phones.forEach(phone => {
-        console.log(phone.image);
+        // console.log(phone.image);
         const phoneDiv = document.createElement('div')
         phoneDiv.classList.add('col')
         phoneDiv.innerHTML = `
@@ -32,12 +42,34 @@ const displayPhones = (phones) => {
       </div>
         `;
         phonesContainer.appendChild(phoneDiv);
+
     });
+    toggleSpiner(false)
 }
-document.getElementById('search_btn').addEventListener('click', function () {
+
+const processSearch = (dataLimit) => {
+    toggleSpiner(true);
     const searchField = document.getElementById('search_field');
     const searchText = searchField.value;
-    searchField.value = '';
-    loadPhone(searchText)
+    // searchField.value = '';
+    loadPhone(searchText, dataLimit);
+}
+
+document.getElementById('search_btn').addEventListener('click', function () {
+    processSearch(10);
 })
+
+const toggleSpiner = isLoading => {
+    const loderSection = document.getElementById('loder');
+    if (isLoading) {
+        loderSection.classList.remove('d-none');
+    } else {
+        loderSection.classList.add('d-none')
+    }
+}
+// not  the best Solution, this is wrost solution
+document.getElementById('btn-show-all').addEventListener('click', function () {
+    processSearch();
+})
+
 // loadPhone()
